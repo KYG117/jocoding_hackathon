@@ -1,17 +1,13 @@
-import _ from "lodash";
 import { Setting } from "../../Contexts";
-import { parse } from "./Parse";
+import { parse, Parsed } from "./Parse";
 import prompts from "./Prompts";
 
-async function TranslateSetting(setting: Setting | null) {
+async function ExtendText(setting: Setting | null, parsed: Parsed) {
 
   let word_num: number;
 
-
   if(setting === null) return "";
- 
-  const random_keywords = _.sampleSize(setting.additional_keywords, 3).map((hk) => hk.keyword);
- 
+  
   switch(setting.li) {
     case 100:
       word_num = 50;
@@ -37,16 +33,15 @@ async function TranslateSetting(setting: Setting | null) {
     default:
       word_num = 500;
   }
-  console.log(random_keywords);
 
-  const keyword_list = setting.keywords.concat(random_keywords);
+  const keyword_list = parsed.keywords;
   const translate_keyword = "Translate the following keywords in Korean into English. Do not answer anything else than the keywords. Seperate the keywords with a single comma(,). " + keyword_list.join(", ");
   const translated_keywords = await prompts(translate_keyword);
 
-  const prompt = "Generate a "+ word_num + "-word " + setting.format + "which has lexile level " + setting.li.toString() + "and title flanked by < and >. The text should be about the following keywords: " + translated_keywords + "."
+  const prompt = "Generate a "+ word_num + "-word " + setting.format + "which has lexile level " + setting.li.toString() + ". The text is about the following keywords: " + translated_keywords + ". A preceding chapter is as the following: \n" + parsed.sentences.map((words) => words.join(" ")).join(". ") + ".";
 
   const prompt_result = await prompts(prompt);
-  return parse(prompt_result, keyword_list);
+  return parse(prompt_result, keyword_list, true, parsed.title);
 }
 
-export default TranslateSetting;
+export default ExtendText;

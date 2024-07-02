@@ -79,7 +79,7 @@ const Context = createContext<ContextData>({
   histories: [],
   addHistory: () => null,
   getHistoryById: () => null,
-  mainPageText: {title: "", sentences: []},
+  mainPageText: {title: "", sentences: [], keywords: []},
   setMainText: () => null,
   currentTextId: 0,
   setTextId: () => 0
@@ -110,6 +110,7 @@ const formats: Format[] = [
   {formatEN: "news", formatKR: "뉴스"},
   {formatEN: "fiction", formatKR: "소설"},
   {formatEN: "academicPaper", formatKR: "논문"},
+  {formatEN: "chapter of a fiction", formatKR: "소설(챕터)"}
   // {formatEN: "non-fiction", formatKR: "논픽션"},
   // {formatEN: "poem", formatKR: "시"}
 ];
@@ -118,7 +119,7 @@ export function ContextProvider({ children }: { children: ReactNode }) {
   const [ settings, setSettings ] = useState<Setting[]>([defaultSetting]);
   const [ currentId, setCurrentId ] = useState(100);
   const [ histories, setHistories ] = useState<History[]>([]);
-  const [ mainPageText, setMainPageText ] = useState<Parsed>({title: "", sentences: []});
+  const [ mainPageText, setMainPageText ] = useState<Parsed>({title: "", sentences: [], keywords: []});
   const [ currentTextId, setCurrentTextId ] = useState(0);
 
   const getSettingById = (id: number) => {

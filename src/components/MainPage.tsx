@@ -34,6 +34,7 @@ import { useForm } from "react-hook-form"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import dictionaryCall from './api/DictionaryCall'
 import keywordGen from './api/KeywordGen'
+import ExtendText from './api/ExtendText'
 
 interface DictionaryPopupProps {
   word: string;
@@ -160,11 +161,23 @@ function MainPage() {
   
   const handleClick = async () => {
     setSelectedWord([-1, -1]);
-    setMainText({title: "로딩중...", sentences: []});
+    setMainText({title: "로딩중...", sentences: [], keywords: []});
     const newText = await TranslateSetting(currentSetting());
-    setMainText(newText === "" ? {title: "생성 중 오류가 발생했습니다. 다시 시도해 주세요.", sentences: []} : newText);
+    setMainText(newText === "" ? {title: "생성 중 오류가 발생했습니다. 다시 시도해 주세요.", sentences: [], keywords: []} : newText);
     if(newText !== ""){
       const thisPage = addHistory(newText);
+      if (thisPage !== null) setTextId(thisPage.id);
+    }
+  }
+
+  const handleExtend = async () => {
+    const previousChapter = mainPageText;
+    setMainText({title: "로딩중...", sentences: [], keywords: []});
+    const newText = await ExtendText(currentSetting(), mainPageText);
+    const sumText = {title: previousChapter.title, sentences: previousChapter.sentences.concat(newText === "" ? [] : newText.sentences), keywords: previousChapter.keywords};
+    setMainText(newText === "" ? {title: "생성 중 오류가 발생했습니다. 다시 시도해 주세요.", sentences: [], keywords: []} : sumText);
+    if(newText !== ""){
+      const thisPage = addHistory(sumText);
       if (thisPage !== null) setTextId(thisPage.id);
     }
   }
@@ -305,6 +318,7 @@ function MainPage() {
               
               <div>
                 <Button variant={'default'} type="submit">새로운 글</Button>
+                <button onClick={handleExtend}>이어서 생성</button>
               </div>
             
             </form>
