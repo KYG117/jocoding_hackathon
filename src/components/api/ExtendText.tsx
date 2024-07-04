@@ -4,6 +4,8 @@ import prompts from "./Prompts";
 
 async function ExtendText(setting: Setting | null, parsed: Parsed) {
 
+  console.log("Extending Text");
+
   let word_num: number;
 
   if(setting === null) return "";
@@ -38,7 +40,7 @@ async function ExtendText(setting: Setting | null, parsed: Parsed) {
   const translate_keyword = "Translate the following keywords in Korean into English. Do not answer anything else than the keywords. Seperate the keywords with a single comma(,). " + keyword_list.join(", ");
   const translated_keywords = await prompts(translate_keyword);
 
-  const prompt = "Generate a "+ word_num + "-word " + setting.format + "which has lexile level " + setting.li.toString() + ". The text is about the following keywords: " + translated_keywords + ". A preceding chapter is as the following: \n" + parsed.sentences.map((words) => words.join(" ")).join(". ") + ".";
+  const prompt = "Generate a "+ word_num + "-word " + setting.format + " which has lexile level " + setting.li.toString() + ". The text is about the following keywords: " + translated_keywords + ". A preceding chapter is as the following: \n" + parsed.sentences.map((words) => words.join(" ")).join(". ") + ".";
 
   const prompt_result = await prompts(prompt);
   return parse(prompt_result, keyword_list, true, parsed.title);

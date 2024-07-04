@@ -9,6 +9,7 @@ interface Message {
 }
 */
 async function prompts(question: string, role?: string): Promise<string>{
+  console.log("Question: ", question);
   try {
 
     const completion = await openai.chat.completions.create({
@@ -22,6 +23,8 @@ async function prompts(question: string, role?: string): Promise<string>{
     const answer = completion.choices[0].message.content;
     
     if(!answer) throw new Error("Answer is Null!");
+
+    console.log("Answer: ", answer);
 
     return answer;
   } catch (error) {

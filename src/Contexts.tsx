@@ -45,6 +45,10 @@ export type History = {
   page: Parsed;
 }
 
+const mergeParsed = (p1: Parsed, p2: Parsed) => {
+  return {title: p1.title, sentences: p1.sentences.concat(p2.sentences), keywords: p1.keywords.concat(p2.keywords)};
+}
+
 export type ContextData = {
   settings: Setting[];
   currentSetting: () => Setting | null;
@@ -59,6 +63,7 @@ export type ContextData = {
   histories: History[];
   addHistory: (history: Parsed) => History | null;
   getHistoryById: (id: number) => History | null;
+  extendHistory: (history: Parsed, id: number) => History | null;
 
   mainPageText: Parsed;
   setMainText: (page: Parsed) => Parsed | null;
@@ -79,6 +84,7 @@ const Context = createContext<ContextData>({
   histories: [],
   addHistory: () => null,
   getHistoryById: () => null,
+  extendHistory: () => null,
   mainPageText: {title: "", sentences: [], keywords: []},
   setMainText: () => null,
   currentTextId: 0,
@@ -191,6 +197,13 @@ export function ContextProvider({ children }: { children: ReactNode }) {
   const getHistoryById = (id: number) => {
     return histories.find((history: History) => history.id === id) || null;
   }
+  const extendHistory = (history: Parsed, id: number) => {
+    const foundHistory = getHistoryById(id);
+    if(!foundHistory) return null;
+    const newHistory = {id: id, page: mergeParsed(foundHistory.page, history)};
+    setHistories([newHistory, ...histories.filter((history) => history.id !== id)].sort((a, b) => a.id - b.id));
+    return newHistory;
+  }
 
   const setMainText = (page: Parsed) => {
     setMainPageText(page);
@@ -217,6 +230,7 @@ export function ContextProvider({ children }: { children: ReactNode }) {
         histories,
         addHistory,
         getHistoryById,
+        extendHistory,
         mainPageText,
         setMainText,
         currentTextId,

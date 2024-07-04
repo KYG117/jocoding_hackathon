@@ -146,7 +146,7 @@ function ParagraphBox({children}: ParagraphBoxProps) {
 }
 
 function MainPage() {
-  const { currentSetting, changeSetting, addHistory, mainPageText, setMainText, setTextId } = useContexts();
+  const { currentSetting, changeSetting, addHistory, extendHistory, mainPageText, setMainText, setTextId, currentTextId } = useContexts();
   const [ isDictionaryVisible, setIsDictionaryVisible ] = useState(false);
   const [ selectedWord, setSelectedWord ] = useState([-1, -1]);
   const [ dictionaryItem, setDictionaryItem ] = useState<DictionaryItem>({word: "", description: []});
@@ -177,8 +177,7 @@ function MainPage() {
     const sumText = {title: previousChapter.title, sentences: previousChapter.sentences.concat(newText === "" ? [] : newText.sentences), keywords: previousChapter.keywords};
     setMainText(newText === "" ? {title: "생성 중 오류가 발생했습니다. 다시 시도해 주세요.", sentences: [], keywords: []} : sumText);
     if(newText !== ""){
-      const thisPage = addHistory(sumText);
-      if (thisPage !== null) setTextId(thisPage.id);
+      extendHistory(newText, currentTextId);
     }
   }
 
@@ -318,11 +317,12 @@ function MainPage() {
               
               <div>
                 <Button variant={'default'} type="submit">새로운 글</Button>
-                <button onClick={handleExtend}>이어서 생성</button>
               </div>
-            
             </form>
           </Form>
+          <div>
+            <button onClick={handleExtend}>이어서 생성</button>
+          </div>
         </div>
         {isDictionaryVisible && <DictionaryPopup 
             word={dictionaryItem.word} 
