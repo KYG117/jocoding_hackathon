@@ -62,7 +62,18 @@ const Sidebar = ({isSettings}: SidebarProps) => {
   const handleHistoryClick = (id: number) => () => {
     const history = getHistoryById(id);
     if(history !== null) {
-      setMainText(history.page);
+      let maintext: string[][] = [];
+      let index = history.currentNode;
+      while(index !== 0) {
+        const node = history.nodes.find((node) => node.id === index);
+        if(node) {
+          maintext = node.page.sentences.concat(maintext);
+          index = node.parentId;
+        } else {
+          break;
+        }
+      }
+      setMainText({keywords: history.nodes[0].page.keywords, title: history.nodes[0].page.title, sentences: maintext});
       setTextId(id);
     }
   }
@@ -83,7 +94,7 @@ const Sidebar = ({isSettings}: SidebarProps) => {
                 const isSelected = history.id === currentTextId;
                 
                 return (<div onClick={handleHistoryClick(history.id)} key={"clickdiv-"+history.id.toString()}>
-                  <HistoryBlock text={history.page.title.replace("<", "").replace(">", "")} index={history.id} isSelected={isSelected} key={history.id}/>
+                  <HistoryBlock text={history.nodes[0].page.title.replace("<", "").replace(">", "")} index={history.id} isSelected={isSelected} key={history.id}/>
                 </div>);
               })
             }

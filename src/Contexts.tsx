@@ -40,13 +40,18 @@ export type Format = {
   formatKR: string;
 }
 
-export type History = {
+export type HistoryNode = {
   id: number;
   page: Parsed;
+  selection: string;
+  parentId: number;
+  children: number[];
 }
 
-const mergeParsed = (p1: Parsed, p2: Parsed) => {
-  return {title: p1.title, sentences: p1.sentences.concat(p2.sentences), keywords: p1.keywords.concat(p2.keywords)};
+export type History = {
+  id: number;
+  nodes: HistoryNode[];
+  currentNode: number;
 }
 
 export type ContextData = {
@@ -63,7 +68,7 @@ export type ContextData = {
   histories: History[];
   addHistory: (history: Parsed) => History | null;
   getHistoryById: (id: number) => History | null;
-  extendHistory: (history: Parsed, id: number) => History | null;
+  extendHistory: (history: Parsed, id: number, selection: string) => History | null;
 
   mainPageText: Parsed;
   setMainText: (page: Parsed) => Parsed | null;
@@ -190,17 +195,18 @@ export function ContextProvider({ children }: { children: ReactNode }) {
   const getPredefinedFormats = () => formats;
 
   const addHistory = (page: Parsed) => {
-    const newHistory = {id: generateHistoryId(), page: page};
+    const newHistory = {id: generateHistoryId(), nodes: [{id: 1, page: page, selection: "", parentId: 0, children: []}], currentNode: 1};
     setHistories([newHistory, ...histories]);
     return newHistory;
   }
   const getHistoryById = (id: number) => {
     return histories.find((history: History) => history.id === id) || null;
   }
-  const extendHistory = (history: Parsed, id: number) => {
+  const extendHistory = (history: Parsed, id: number, selection: string) => {
     const foundHistory = getHistoryById(id);
     if(!foundHistory) return null;
-    const newHistory = {id: id, page: mergeParsed(foundHistory.page, history)};
+    const fhnl = foundHistory.nodes.length;
+    const newHistory = {id: id, nodes: [...foundHistory.nodes.filter((node) => node.id !== foundHistory.currentNode), {id: fhnl + 1, page: history, selection: selection, parentId: foundHistory.currentNode, children: []}, {...foundHistory.nodes[foundHistory.currentNode], children: [...foundHistory.nodes[foundHistory.currentNode].children, fhnl+1]}], currentNode: fhnl + 1};
     setHistories([newHistory, ...histories.filter((history) => history.id !== id)].sort((a, b) => a.id - b.id));
     return newHistory;
   }

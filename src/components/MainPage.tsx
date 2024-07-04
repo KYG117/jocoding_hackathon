@@ -6,6 +6,7 @@ import deleteKeyword from '../assets/deleteKeyword.svg'
 import exitIcon from '../assets/exitIcon.svg'
 
 import Sidebar from './Sidebar'
+import HistoryView from './HistoryView'
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ReactNode, useState } from 'react'
@@ -146,7 +147,7 @@ function ParagraphBox({children}: ParagraphBoxProps) {
 }
 
 function MainPage() {
-  const { currentSetting, changeSetting, addHistory, extendHistory, mainPageText, setMainText, setTextId, currentTextId } = useContexts();
+  const { currentSetting, changeSetting, addHistory, extendHistory, mainPageText, setMainText, setTextId, currentTextId, getHistoryById } = useContexts();
   const [ isDictionaryVisible, setIsDictionaryVisible ] = useState(false);
   const [ selectedWord, setSelectedWord ] = useState([-1, -1]);
   const [ dictionaryItem, setDictionaryItem ] = useState<DictionaryItem>({word: "", description: []});
@@ -177,7 +178,7 @@ function MainPage() {
     const sumText = {title: previousChapter.title, sentences: previousChapter.sentences.concat(newText === "" ? [] : newText.sentences), keywords: previousChapter.keywords};
     setMainText(newText === "" ? {title: "생성 중 오류가 발생했습니다. 다시 시도해 주세요.", sentences: [], keywords: []} : sumText);
     if(newText !== ""){
-      extendHistory(newText, currentTextId);
+      extendHistory(newText, currentTextId, "");
     }
   }
 
@@ -332,6 +333,7 @@ function MainPage() {
               setIsDictionaryVisible(false)
             }}/>}
       </div>
+      <HistoryView history={getHistoryById(currentTextId)}/>
     </>
   )
 }
