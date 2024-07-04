@@ -333,7 +333,7 @@ function MainPage() {
               setIsDictionaryVisible(false)
             }}/>}
       </div>
-      <HistoryView history={getHistoryById(currentTextId)}/>
+      {getHistoryById(currentTextId) && <HistoryView history={getHistoryById(currentTextId)!}/>}
     </>
   )
 }
