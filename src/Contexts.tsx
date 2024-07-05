@@ -40,18 +40,21 @@ export type Format = {
   formatKR: string;
 }
 
-export type HistoryNode = {
+export type HistoryTree = {
   id: number;
+  name: string;
   page: Parsed;
   selection: string;
-  parentId: number;
-  children: number[];
+  ancestors: number[];
+  children: HistoryTree[];
 }
 
 export type History = {
   id: number;
-  nodes: HistoryNode[];
+  tree: HistoryTree;
   currentNode: number;
+  currentNodeAncestors: number[];
+  idCount: number;
 }
 
 export type ContextData = {
@@ -194,8 +197,19 @@ export function ContextProvider({ children }: { children: ReactNode }) {
   }
   const getPredefinedFormats = () => formats;
 
+  const extendTree = (tree: HistoryTree, branch: HistoryTree, ancestors: number[]): HistoryTree => {
+    if(ancestors.length === 0) return {id: tree.id, page: tree.page, name: tree.page.sentences[0].join(" "), selection: tree.selection, ancestors: tree.ancestors, children: tree.children.concat([branch])};
+    if(ancestors[0] === 0) return extendTree(tree, branch, ancestors.slice(1));
+    const nextChild = tree.children.find((child) => child.id === ancestors[0]);
+    if(nextChild) {
+      return {id: tree.id, page: tree.page, name: tree.page.sentences[0].join(" "), selection: tree.selection, ancestors: tree.ancestors, children: tree.children.filter((child) => child.id !== ancestors[0]).concat([extendTree(nextChild, branch, ancestors.slice(1))])};
+    } else {
+      return tree;
+    }
+  }
+
   const addHistory = (page: Parsed) => {
-    const newHistory = {id: generateHistoryId(), nodes: [{id: 1, page: page, selection: "", parentId: 0, children: []}], currentNode: 1};
+    const newHistory = {id: generateHistoryId(), tree: {id: 1, page: page, name: page.sentences[0].join(" "), selection: "", ancestors: [0], children: []}, currentNode: 1, currentNodeAncestors: [0], idCount: 1};
     setHistories([newHistory, ...histories]);
     return newHistory;
   }
@@ -205,9 +219,14 @@ export function ContextProvider({ children }: { children: ReactNode }) {
   const extendHistory = (history: Parsed, id: number, selection: string) => {
     const foundHistory = getHistoryById(id);
     if(!foundHistory) return null;
-    const fhnl = foundHistory.nodes.length;
-    const newHistory = {id: id, nodes: [...foundHistory.nodes.filter((node) => node.id !== foundHistory.currentNode), {id: fhnl + 1, page: history, selection: selection, parentId: foundHistory.currentNode, children: []}, {...foundHistory.nodes[foundHistory.currentNode], children: [...foundHistory.nodes[foundHistory.currentNode].children, fhnl+1]}], currentNode: fhnl + 1};
+    const extendedTree = extendTree(foundHistory.tree, {id: foundHistory.idCount + 1, page: history, name: history.sentences[0].join(" "), selection: selection, ancestors: foundHistory.currentNodeAncestors.concat([foundHistory.currentNode]), children: []}, foundHistory.currentNodeAncestors);
+    console.log("previous tree: ");
+    console.log(foundHistory.tree);
+    console.log("extended tree: ");
+    console.log(extendedTree);
+    const newHistory = {id: id, tree: extendedTree, currentNode: foundHistory.idCount + 1, currentNodeAncestors: foundHistory.currentNodeAncestors.concat([foundHistory.currentNode]), idCount: foundHistory.idCount + 1};
     setHistories([newHistory, ...histories.filter((history) => history.id !== id)].sort((a, b) => a.id - b.id));
+    console.log(newHistory);
     return newHistory;
   }
 

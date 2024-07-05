@@ -110,7 +110,7 @@ const CurrentSettingBlock = () => {
         <SelectContent>
           {
             getPredefinedFormats().map((entry) => (
-              <SelectItem value={entry.formatEN}>{entry.formatKR}</SelectItem>
+              <SelectItem value={entry.formatEN} key={entry.formatEN}>{entry.formatKR}</SelectItem>
             ))
           }
         </SelectContent>
@@ -333,7 +333,7 @@ function MainPage() {
               setIsDictionaryVisible(false)
             }}/>}
       </div>
-      {getHistoryById(currentTextId) && <HistoryView history={getHistoryById(currentTextId)!}/>}
+      {getHistoryById(currentTextId) && <div className="historyView sectionBorder"><HistoryView history={getHistoryById(currentTextId)!}/></div>}
     </>
   )
 }
