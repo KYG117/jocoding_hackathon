@@ -197,6 +197,7 @@ export function ContextProvider({ children }: { children: ReactNode }) {
   }
   const getPredefinedFormats = () => formats;
 
+  // TO FIX: This function is not working properly.
   const extendTree = (tree: HistoryTree, branch: HistoryTree, ancestors: number[]): HistoryTree => {
     if(ancestors.length === 0) return {id: tree.id, page: tree.page, name: tree.page.sentences[0].join(" "), selection: tree.selection, ancestors: tree.ancestors, children: tree.children.concat([branch])};
     if(ancestors[0] === 0) return extendTree(tree, branch, ancestors.slice(1));
