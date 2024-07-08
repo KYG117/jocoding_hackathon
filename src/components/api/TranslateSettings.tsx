@@ -7,7 +7,6 @@ async function TranslateSetting(setting: Setting | null) {
 
   let word_num: number;
 
-
   if(setting === null) return "";
  
   const random_keywords = _.sampleSize(setting.additional_keywords, 3).map((hk) => hk.keyword);
@@ -41,7 +40,7 @@ async function TranslateSetting(setting: Setting | null) {
 
   const keyword_list = setting.keywords.concat(random_keywords);
   const translate_keyword = "Translate the following keywords in Korean into English. Do not answer anything else than the keywords. Seperate the keywords with a single comma(,). " + keyword_list.join(", ");
-  const translated_keywords = await prompts(translate_keyword);
+  const translated_keywords = await prompts(translate_keyword, "You should translate the following keywords into English.");
 
   const prompt = "Generate a "+ word_num + "-word " + setting.format + " which has lexile level " + setting.li.toString() + " and title flanked by < and >. The text should be about the following keywords: " + translated_keywords + "."
 
