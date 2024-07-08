@@ -197,10 +197,9 @@ export function ContextProvider({ children }: { children: ReactNode }) {
   }
   const getPredefinedFormats = () => formats;
 
-  // TO FIX: This function is not working properly.
   const extendTree = (tree: HistoryTree, branch: HistoryTree, ancestors: number[]): HistoryTree => {
     if(ancestors.length === 0) return {id: tree.id, page: tree.page, name: tree.page.sentences[0].join(" "), selection: tree.selection, ancestors: tree.ancestors, children: tree.children.concat([branch])};
-    if(ancestors[0] === 0) return extendTree(tree, branch, ancestors.slice(1));
+    if(ancestors[0] === 0 || ancestors[0] === 1) return extendTree(tree, branch, ancestors.slice(1));
     const nextChild = tree.children.find((child) => child.id === ancestors[0]);
     if(nextChild) {
       return {id: tree.id, page: tree.page, name: tree.page.sentences[0].join(" "), selection: tree.selection, ancestors: tree.ancestors, children: tree.children.filter((child) => child.id !== ancestors[0]).concat([extendTree(nextChild, branch, ancestors.slice(1))])};
@@ -220,7 +219,7 @@ export function ContextProvider({ children }: { children: ReactNode }) {
   const extendHistory = (history: Parsed, id: number, selection: string) => {
     const foundHistory = getHistoryById(id);
     if(!foundHistory) return null;
-    const extendedTree = extendTree(foundHistory.tree, {id: foundHistory.idCount + 1, page: history, name: history.sentences[0].join(" "), selection: selection, ancestors: foundHistory.currentNodeAncestors.concat([foundHistory.currentNode]), children: []}, foundHistory.currentNodeAncestors);
+    const extendedTree = extendTree(foundHistory.tree, {id: foundHistory.idCount + 1, page: history, name: history.sentences[0].join(" "), selection: selection, ancestors: foundHistory.currentNodeAncestors.concat([foundHistory.currentNode]), children: []}, foundHistory.currentNodeAncestors.concat([foundHistory.currentNode]));
     console.log("previous tree: ");
     console.log(foundHistory.tree);
     console.log("extended tree: ");
