@@ -1,31 +1,20 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-import OpenAI from 'openai';
+const genAI = new GoogleGenerativeAI('AIzaSyCKHj6GBTDC1vs84cAGtP4Aev5KiewH6TY');
 
-const openai = new OpenAI({apiKey: import.meta.env.VITE_OPENAI_API_KEY, dangerouslyAllowBrowser: true});
-/*
-interface Message {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
-*/
-async function prompts(question: string, role?: string): Promise<string>{
+// Function to generate responses using Gemini API
+async function prompts(question: string): Promise<string> {
   try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        { role: 'system', content: role ? role : 'You are a text generator which for English learner. Do not answer my question. Just generate reading text and use only English.' },
-        { role: 'user', content: question }],
-      max_tokens: 4095
-    });
+    const result = await model.generateContent(question);
+    const response = result.response;
+    const text = response.text();
+    console.log(text);
 
-    const answer = completion.choices[0].message.content;
-    
-    if(!answer) throw new Error("Answer is Null!");
-
-    return answer;
+    return text;
   } catch (error) {
-    console.error('Error communicating with OpenAI:', error);
+    console.error('Error communicating with Google Generative AI:', error);
 
     return "";
   }
